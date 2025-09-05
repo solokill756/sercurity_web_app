@@ -1,0 +1,17 @@
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h1 class="h3 mb-0">Events</h1>
+  <%= link_to "New Event", new_event_path, class: "btn btn-success" rescue nil %>
+</div>
+
+<div class="list-group">
+  <% @events.each do |e| %>
+    <a class="list-group-item list-group-item-action" href="<%= event_path(e) %>">
+      <div class="d-flex w-100 justify-content-between">
+        <h5 class="mb-1"><%= e.title %></h5>
+        <small><%= l(e.starts_at) rescue e.starts_at %></small>
+      </div>
+      <p class="mb-1 text-muted"><%= e.location %></p>
+      <small><%= truncate(e.description, length: 120) %></small>
+    </a>
+  <% end %>
+</div>

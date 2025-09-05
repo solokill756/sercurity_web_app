@@ -1,16 +1,67 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>RailsTutorial</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Securitour</title>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-
   <body>
-    <%= yield %>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="<%= root_path %>">Securitour</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
+          aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div id="nav" class="collapse navbar-collapse">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><%= link_to "Events", events_path, class: "nav-link" %></li>
+          </ul>
+
+          <ul class="navbar-nav ms-auto">
+            <% if current_user %>
+              <li class="nav-item">
+                <span class="navbar-text me-3"><%= current_user.email %></span>
+              </li>
+              <li class="nav-item">
+                <%= button_to "Logout", session_path, method: :delete, class: "btn btn-outline-light btn-sm" %>
+              </li>
+            <% else %>
+              <li class="nav-item">
+                <%= link_to "Login", new_session_path, class: "btn btn-outline-light btn-sm" %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container my-4">
+
+      <!-- FLASH MESSAGES -->
+      <% if notice.present? %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <%= notice %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <% end %>
+      <% if alert.present? %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <%= alert %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <% end %>
+
+      <%= yield %>
+    </div>
+
+    <footer class="text-center text-muted py-4">
+      <small>© <%= Time.current.year %> Securitour Demo</small>
+    </footer>
   </body>
 </html>

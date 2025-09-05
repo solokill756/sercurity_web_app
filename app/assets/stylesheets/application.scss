@@ -1,0 +1,7 @@
+// Bootstrap SCSS từ gem
+@import "bootstrap";
+
+/* Optional: style nhỏ cho flash */
+.notice, .alert {
+  margin-top: 1rem;
+}
