@@ -26,7 +26,11 @@ gem "stimulus-rails"
 
 gem "bcrypt"
 
+gem "config"
+
 gem "rack-attack"
+
+gem "sanitize"
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"

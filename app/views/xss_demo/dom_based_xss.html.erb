@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DOM-based XSS Demo - VULNERABLE</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .danger-banner {
+      background: #e74c3c;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    .demo-section {
+      background: #ecf0f1;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .result-area {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 5px;
+      min-height: 100px;
+    }
+    .btn {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      text-decoration: none;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-danger { background-color: #e74c3c; }
+    .btn-info { background-color: #3498db; }
+    .btn-warning { background-color: #f39c12; }
+    input[type="text"], input[type="url"] {
+      width: 70%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+      margin: 5px;
+    }
+    .payload-examples {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      margin: 15px 0;
+      font-size: 14px;
+    }
+    .code-example {
+      background: #34495e;
+      color: #ecf0f1;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      margin: 10px 0;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="danger-banner">
+      ⚠️ VULNERABLE DOM-BASED XSS DEMO ⚠️<br>
+      This page intentionally contains XSS vulnerabilities for educational purposes
+    </div>
+
+    <h1>⚡ JavaScript Processing - DOM-based XSS Demo</h1>
+    
+    <p><strong>Vulnerability:</strong> Client-side JavaScript processes user input unsafely, allowing malicious scripts to execute without any server interaction.</p>
+
+    <div class="demo-section">
+      <h3>Demo 1: URL Fragment Processing</h3>
+      <p>The page reads from URL fragment (#) and displays it using innerHTML:</p>
+      <div class="result-area" id="fragment-result">
+        Current URL fragment will appear here...
+      </div>
+      
+      <div class="payload-examples">
+        Try these URLs (click to test):<br>
+        <a href="#<script>alert('DOM XSS via fragment')</script>">Basic Script Alert</a><br>
+        <a href="#<img src=x onerror=alert('Fragment image XSS')>">Image Tag XSS</a><br>
+        <a href="#<svg onload=alert('Fragment SVG XSS')></svg>">SVG Element XSS</a>
+      </div>
+      
+      <button class="btn btn-danger" onclick="loadFragment()">Reload Fragment Display</button>
+      <button class="btn btn-danger" onclick="testFragment()">Test Fragment XSS</button>
+    </div>
+
+    <div class="demo-section">
+      <h3>Demo 2: User Input Processing</h3>
+      <p>Enter text that will be processed by vulnerable JavaScript:</p>
+      <input type="text" id="user-input" placeholder="Enter some text...">
+      <button class="btn btn-danger" onclick="processUserInput()">Process Input (Vulnerable)</button>
+      
+      <div class="result-area" id="input-result">
+        Processed input will appear here...
+      </div>
+      
+      <div class="payload-examples">
+        Quick test buttons:<br>
+        <button class="btn btn-danger" onclick="quickTest1()">Test Script Alert</button>
+        <button class="btn btn-danger" onclick="quickTest2()">Test Image XSS</button><br>
+        Or try typing these payloads:<br>
+        &lt;script&gt;alert('DOM XSS from input')&lt;/script&gt;<br>
+        &lt;img src=x onerror=alert('Input image XSS')&gt;<br>
+        &lt;svg onload=alert('Input SVG XSS')&gt;&lt;/svg&gt;
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h3>Demo 3: URL Parameter Processing</h3>
+      <p>JavaScript reads URL parameters and displays them unsafely:</p>
+      <input type="text" id="url-param" placeholder="Enter parameter value...">
+      <button class="btn btn-danger" onclick="processUrlParam()">Simulate URL Parameter (Vulnerable)</button>
+      <button class="btn btn-danger" onclick="quickTest3()">Quick SVG Test</button>
+      
+      <div class="result-area" id="param-result">
+        URL parameter result will appear here...
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h3>Demo 4: Cookie Manipulation</h3>
+      <button class="btn btn-danger" onclick="demonstrateCookieTheft()">Demonstrate Cookie Access</button>
+      <div class="result-area" id="cookie-result">
+        Cookie information will appear here...
+      </div>
+    </div>
+
+    <h3>Vulnerable JavaScript Code Examples</h3>
+    <div class="code-example">// Vulnerable: Direct innerHTML assignment
+function processUserInput() {
+  var input = document.getElementById('user-input').value;
+  // VULNERABLE: No sanitization
+  document.getElementById('input-result').innerHTML = 'You entered: ' + input;
+}
+
+// Vulnerable: URL fragment processing
+function loadFragment() {
+  var fragment = window.location.hash.substring(1);
+  // VULNERABLE: Direct innerHTML assignment
+  document.getElementById('fragment-result').innerHTML = 'Fragment: ' + fragment;
+}
+
+// Vulnerable: URL parameter processing
+function processUrlParam() {
+  var param = document.getElementById('url-param').value;
+  // VULNERABLE: No validation or encoding
+  document.getElementById('param-result').innerHTML = 'Parameter: ' + param;
+}</div>
+
+    <div style="margin-top: 30px;">
+      <a href="<%= xss_demo_path %>" class="btn btn-info">Back to XSS Demo Home</a>
+    </div>
+
+    <div style="background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 5px; margin-top: 20px;">
+      <strong>How this works:</strong><br>
+      1. JavaScript on the page processes user input (URL fragments, form inputs, etc.)<br>
+      2. The input is used unsafely (innerHTML, eval, etc.) without validation<br>
+      3. Malicious script executes entirely in the browser<br>
+      4. No server communication is needed - purely client-side vulnerability<br>
+      5. Can access cookies, localStorage, make requests, modify page content
+    </div>
+  </div>
+
+  <script>
+    // VULNERABLE JavaScript functions for demonstration
+    
+    function processUserInput() {
+      var input = document.getElementById('user-input').value;
+      // VULNERABLE: Direct innerHTML assignment without sanitization
+      document.getElementById('input-result').innerHTML = 'You entered: ' + input;
+    }
+    
+    function loadFragment() {
+      var fragment = window.location.hash.substring(1);
+      if (fragment) {
+        // VULNERABLE: Direct innerHTML assignment
+        document.getElementById('fragment-result').innerHTML = 'Fragment: ' + decodeURIComponent(fragment);
+      } else {
+        document.getElementById('fragment-result').innerHTML = 'No fragment in URL';
+      }
+    }
+    
+    function testFragment() {
+      // Directly set a malicious fragment for testing
+      window.location.hash = '<script>alert("Fragment XSS Test!")</script>';
+      loadFragment();
+    }
+    
+    function processUrlParam() {
+      var param = document.getElementById('url-param').value;
+      // VULNERABLE: No validation or encoding
+      document.getElementById('param-result').innerHTML = 'Parameter: ' + param;
+    }
+    
+    function demonstrateCookieTheft() {
+      // Demonstrate how XSS can access cookies
+      var cookies = document.cookie;
+      var result = 'Current cookies: ' + cookies;
+      if (!cookies) {
+        result = 'No cookies found. In a real attack, this could steal session cookies!';
+      }
+      document.getElementById('cookie-result').innerHTML = result;
+      
+      // Simulate what an attacker might do
+      console.log('Cookies that could be stolen:', cookies);
+    }
+    
+    // Quick test functions for easy demo
+    function quickTest1() {
+      document.getElementById('user-input').value = '<script>alert("Input XSS!")</script>';
+      processUserInput();
+    }
+    
+    function quickTest2() {
+      document.getElementById('user-input').value = '<img src=x onerror=alert("Image XSS!")>';
+      processUserInput();
+    }
+    
+    function quickTest3() {
+      document.getElementById('url-param').value = '<svg onload=alert("SVG XSS!")></svg>';
+      processUrlParam();
+    }
+    
+    // Auto-load fragment when page loads
+    window.onload = function() {
+      loadFragment();
+    };
+    
+    // Update fragment display when hash changes
+    window.onhashchange = function() {
+      loadFragment();
+    };
+  </script>
+</body>
+</html>

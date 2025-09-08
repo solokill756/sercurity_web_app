@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Safe Reflected XSS Demo - PROTECTED</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .safe-banner {
+      background: #27ae60;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    .search-form {
+      background: #d5f4e6;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    .search-result {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    .btn {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      text-decoration: none;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-success { background-color: #27ae60; }
+    .btn-info { background-color: #3498db; }
+    .btn-danger { background-color: #e74c3c; }
+    input[type="text"] {
+      width: 70%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    .protection-info {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      margin: 15px 0;
+      font-size: 14px;
+    }
+    .url-example {
+      background: #d5f4e6;
+      color: #155724;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      word-break: break-all;
+      margin: 10px 0;
+      border: 1px solid #c3e6cb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="safe-banner">
+      ✅ PROTECTED REFLECTED XSS DEMO ✅<br>
+      This page demonstrates proper XSS protection techniques
+    </div>
+
+    <h1>🔍 Search System - Safe Implementation</h1>
+    
+    <p><strong>Protection:</strong> All user input is properly sanitized and escaped before being displayed. HTML special characters are converted to safe entities.</p>
+
+    <div class="search-form">
+      <h3>Search Form (Safe)</h3>
+      <form method="GET" action="<%= safe_reflected_xss_path %>">
+        <input type="text" name="q" value="<%= @search_term %>" placeholder="Enter search term...">
+        <button type="submit" class="btn btn-success">Search (Safe)</button>
+      </form>
+      
+      <div class="protection-info">
+        Protection methods applied:<br>
+        • CGI.escapeHTML() - Converts &lt; &gt; & " ' to HTML entities<br>
+        • Rails default escaping - ERB automatically escapes output<br>
+        • Input validation and length limits<br>
+        Try the same XSS payloads - they will be safely displayed as text!
+      </div>
+    </div>
+
+    <% if @search_term.present? %>
+      <div class="search-result">
+        <h3>Search Results</h3>
+        <p>You searched for: 
+          <!-- SAFE: Rails automatically escapes HTML by default -->
+          <strong><%= @search_term %></strong>
+        </p>
+        <p>No results found for your search term.</p>
+        <p><em>Notice: Any HTML/JavaScript in your search term is safely displayed as text.</em></p>
+      </div>
+    <% end %>
+
+    <% if @message.present? %>
+      <div class="search-result">
+        <h3>Message</h3>
+        <p>
+          <!-- SAFE: Properly escaped output -->
+          <%= @message %>
+        </p>
+      </div>
+    <% end %>
+
+    <h3>Try These Safe URLs</h3>
+    <p>Click these links to see how XSS attempts are safely handled:</p>
+    
+    <div class="url-example">
+      <a href="<%= safe_reflected_xss_path %>?q=<script>alert('This will not execute')</script>" target="_blank">
+        Script Tag (Safely Escaped)
+      </a>
+    </div>
+    
+    <div class="url-example">
+      <a href="<%= safe_reflected_xss_path %>?q=<img src=x onerror=alert('Safe from XSS')>" target="_blank">
+        Image Tag (Safely Escaped)
+      </a>
+    </div>
+    
+    <div class="url-example">
+      <a href="<%= safe_reflected_xss_path %>?message=<svg onload=alert('No XSS here')></svg>" target="_blank">
+        SVG Element (Safely Escaped)
+      </a>
+    </div>
+
+    <div style="margin-top: 30px;">
+      <a href="<%= xss_demo_path %>" class="btn btn-info">Back to XSS Demo Home</a>
+      <a href="<%= reflected_xss_path %>" class="btn btn-danger">View Vulnerable Version</a>
+    </div>
+
+    <div style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px; margin-top: 20px;">
+      <strong>How protection works:</strong><br>
+      1. <strong>Input Sanitization:</strong> CGI.escapeHTML converts dangerous characters to entities<br>
+      2. <strong>Output Encoding:</strong> Rails ERB templates escape HTML by default<br>
+      3. <strong>Validation:</strong> Input validation and length limits<br>
+      4. <strong>Content Security Policy:</strong> Can prevent inline scripts<br>
+      5. <strong>HTTPOnly Cookies:</strong> Protect session cookies from JavaScript access
+    </div>
+
+    <h3>HTML Encoding Examples</h3>
+    <div style="background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin: 10px 0;">
+      <h4>Original Input → Encoded Output:</h4>
+      <pre style="background: #f8f9fa; padding: 10px; border-radius: 3px;"><code>&lt;script&gt;alert('XSS')&lt;/script&gt;
+↓ (after CGI.escapeHTML)
+&amp;lt;script&amp;gt;alert('XSS')&amp;lt;/script&amp;gt;
+
+&lt;img src=x onerror=alert('XSS')&gt;
+↓ (after CGI.escapeHTML)
+&amp;lt;img src=x onerror=alert('XSS')&amp;gt;</code></pre>
+    </div>
+
+    <h3>Code Comparison</h3>
+    <div style="background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin: 10px 0;">
+      <h4 style="color: #e74c3c;">❌ Vulnerable Code:</h4>
+      <pre style="background: #f8f9fa; padding: 10px; border-radius: 3px;"><code># Controller
+@search_term = params[:q]  # No sanitization
+
+# View
+&lt;%= raw @search_term %&gt;  # Disables escaping</code></pre>
+    </div>
+
+    <div style="background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin: 10px 0;">
+      <h4 style="color: #27ae60;">✅ Safe Code:</h4>
+      <pre style="background: #f8f9fa; padding: 10px; border-radius: 3px;"><code># Controller
+@search_term = CGI.escapeHTML(params[:q]) if params[:q]
+
+# View
+&lt;%= @search_term %&gt;  # Rails auto-escapes by default</code></pre>
+    </div>
+  </div>
+</body>
+</html>

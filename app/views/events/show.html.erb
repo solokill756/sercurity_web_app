@@ -1,2 +1,83 @@
-<h1>Events#show</h1>
-<p>Find me in app/views/events/show.html.erb</p>
+<div class="row">
+  <div class="col-md-8">
+    <h1><%= @event.title %></h1>
+    <p class="text-muted">
+      <i class="fas fa-calendar"></i> <%= @event.starts_at.strftime(Settings.event.date_format) %>
+      <br>
+      <i class="fas fa-map-marker-alt"></i> <%= @event.location %>
+    </p>
+    <div class="mt-4">
+      <h5>Description:</h5>
+      <p><%= @event.description %></p>
+    </div>
+
+    <!-- Comments Section - VULNERABLE TO STORED XSS -->
+    <div class="mt-5">
+      <h4>Comments (<%= @event.comments.count %>)</h4>
+      
+      <!-- Comment Form -->
+      <% if current_user %>
+        <div class="card mb-4">
+          <div class="card-body">
+            <%= form_with model: [@event, Comment.new], local: true, class: "mb-0" do |form| %>
+              <div class="mb-3">
+                <%= form.text_area :content, placeholder: "Add your comment...", 
+                    class: "form-control", rows: 3, required: true %>
+              </div>
+              <%= form.submit "Post Comment", class: "btn btn-primary" %>
+            <% end %>
+          </div>
+        </div>
+      <% else %>
+        <div class="alert alert-info">
+          <%= link_to "Please log in", new_session_path %> to add comments.
+        </div>
+      <% end %>
+
+      <!-- Display Comments - VULNERABLE: Using raw HTML -->
+      <% @event.comments.includes(:user).order(created_at: :desc).each do |comment| %>
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h6 class="card-title mb-1">
+                  <i class="fas fa-user"></i> <%= comment.user.email %>
+                </h6>
+                <small class="text-muted">
+                  <%= time_ago_in_words(comment.created_at) %> ago
+                </small>
+              </div>
+              <% if current_user && (comment.user == current_user || current_user.role == 'admin') %>
+                <%= button_to "Delete", event_comment_path(@event, comment), 
+                    method: :delete,
+                    class: "btn btn-sm btn-outline-danger",
+                    confirm: "Are you sure?",
+                    form: { style: "display: inline-block;" } %>
+              <% end %>
+            </div>
+            
+            <!-- VULNERABLE: Displaying user content without escaping -->
+            <div class="mt-2">
+              <%= raw comment.content %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <% if @event.comments.empty? %>
+        <p class="text-muted">No comments yet. Be the first to comment!</p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Event Details</h5>
+        <p><strong>Date:</strong> <%= @event.starts_at.strftime(Settings.event.date_format) %></p>
+        <p><strong>Time:</strong> <%= @event.starts_at.strftime(Settings.event.time_format) %></p>
+        <p><strong>Location:</strong> <%= @event.location %></p>
+      </div>
+    </div>
+  </div>
+</div>

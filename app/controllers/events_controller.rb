@@ -9,6 +9,10 @@ class EventsController < ApplicationController
     @comments = @event.comments.includes(:user).order(created_at: :asc)
   end
 
+  def xss_demo
+    # Demo page for XSS vulnerability explanation
+  end
+
   def create
     @event = Event.new(event_params)
     if @event.save

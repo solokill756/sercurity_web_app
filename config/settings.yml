@@ -1,0 +1,4 @@
+event:
+  date_format: "%B %d, %Y at %I:%M %p"
+  time_format: "%I:%M %p"
+  default_location: "To be determined"

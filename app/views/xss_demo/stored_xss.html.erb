@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stored XSS Demo - VULNERABLE</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .danger-banner {
+      background: #e74c3c;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    .comment-form {
+      background: #ecf0f1;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    .comment {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+    .comment-header {
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+    .comment-content {
+      /* VULNERABLE: No XSS protection */
+      line-height: 1.6;
+    }
+    .btn {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      text-decoration: none;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-danger { background-color: #e74c3c; }
+    .btn-info { background-color: #3498db; }
+    .btn-warning { background-color: #f39c12; }
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-family: Arial, sans-serif;
+    }
+    .payload-examples {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      margin: 15px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="danger-banner">
+      ⚠️ VULNERABLE STORED XSS DEMO ⚠️<br>
+      This page intentionally contains XSS vulnerabilities for educational purposes
+    </div>
+
+    <h1>💬 Comment System - Stored XSS Demo</h1>
+    
+    <p><strong>Vulnerability:</strong> User comments are stored in the database and displayed without proper sanitization. Any JavaScript code in comments will be executed when the page loads.</p>
+
+    <div class="comment-form">
+      <h3>Add a Comment</h3>
+      <%= form_tag stored_xss_path, method: :post do %>
+        <textarea name="content" rows="4" placeholder="Enter your comment here... Try adding some HTML or JavaScript!"></textarea><br>
+        <button type="submit" class="btn btn-danger">Post Comment (Vulnerable)</button>
+      <% end %>
+      
+      <div class="payload-examples">
+        Try these XSS payloads:<br>
+        &lt;script&gt;alert('Stored XSS Attack!')&lt;/script&gt;<br>
+        &lt;img src=x onerror=alert('Image XSS')&gt;<br>
+        &lt;svg onload=alert('SVG XSS')&gt;&lt;/svg&gt;<br>
+        &lt;iframe src="javascript:alert('Iframe XSS')"&gt;&lt;/iframe&gt;
+      </div>
+    </div>
+
+    <h3>Comments (<%= @comments.count %>)</h3>
+    <% if @comments.any? %>
+      <% @comments.each do |comment| %>
+        <div class="comment">
+          <div class="comment-header">
+            User #<%= comment.user_id %> • <%= comment.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+          </div>
+          <div class="comment-content">
+            <!-- VULNERABLE: Using raw to disable Rails' default XSS protection -->
+            <%= raw comment.content %>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <p>No comments yet. Be the first to comment!</p>
+    <% end %>
+
+    <div style="margin-top: 30px;">
+      <a href="<%= xss_demo_path %>" class="btn btn-info">Back to XSS Demo Home</a>
+      <a href="<%= safe_stored_xss_path %>" class="btn btn-warning">View Safe Version</a>
+      <%= button_to "Clear All Comments", clear_comments_path, method: :delete, 
+                  class: "btn btn-danger", 
+                  confirm: "Are you sure you want to delete all comments?" %>
+    </div>
+
+    <div style="background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 5px; margin-top: 20px;">
+      <strong>How this works:</strong><br>
+      1. User submits malicious JavaScript in the comment form<br>
+      2. The script is stored in the database without sanitization<br>
+      3. When any user views this page, the script executes<br>
+      4. This can steal cookies, redirect users, or perform actions on their behalf
+    </div>
+  </div>
+</body>
+</html>

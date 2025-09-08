@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Reflected XSS Demo - VULNERABLE</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .danger-banner {
+      background: #e74c3c;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    .search-form {
+      background: #ecf0f1;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    .search-result {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    .btn {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      text-decoration: none;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-danger { background-color: #e74c3c; }
+    .btn-info { background-color: #3498db; }
+    .btn-warning { background-color: #f39c12; }
+    input[type="text"] {
+      width: 70%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    .payload-examples {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      margin: 15px 0;
+      font-size: 14px;
+    }
+    .url-example {
+      background: #34495e;
+      color: #ecf0f1;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      word-break: break-all;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="danger-banner">
+      ⚠️ VULNERABLE REFLECTED XSS DEMO ⚠️<br>
+      This page intentionally contains XSS vulnerabilities for educational purposes
+    </div>
+
+    <h1>🔍 Search System - Reflected XSS Demo</h1>
+    
+    <p><strong>Vulnerability:</strong> User input from URL parameters is directly displayed on the page without proper sanitization. Any JavaScript code in the URL will be executed immediately.</p>
+
+    <div class="search-form">
+      <h3>Search Form</h3>
+      <form method="GET" action="<%= reflected_xss_path %>">
+        <input type="text" name="q" value="<%= @search_term %>" placeholder="Enter search term...">
+        <button type="submit" class="btn btn-danger">Search (Vulnerable)</button>
+      </form>
+      
+      <div class="payload-examples">
+        Try these XSS payloads in the search box:<br>
+        &lt;script&gt;alert('Reflected XSS!')&lt;/script&gt;<br>
+        &lt;img src=x onerror=alert('Search XSS')&gt;<br>
+        &lt;svg onload=alert('SVG in search')&gt;&lt;/svg&gt;
+      </div>
+    </div>
+
+    <% if @search_term.present? %>
+      <div class="search-result">
+        <h3>Search Results</h3>
+        <p>You searched for: 
+          <!-- VULNERABLE: Using raw to disable Rails' default XSS protection -->
+          <strong><%= raw @search_term %></strong>
+        </p>
+        <p>No results found for your search term.</p>
+      </div>
+    <% end %>
+
+    <% if @message.present? %>
+      <div class="search-result">
+        <h3>Message</h3>
+        <p>
+          <!-- VULNERABLE: Direct output without sanitization -->
+          <%= raw @message %>
+        </p>
+      </div>
+    <% end %>
+
+    <h3>Try These Vulnerable URLs</h3>
+    <p>Click these links to see reflected XSS in action:</p>
+    
+    <div class="url-example">
+      <a href="<%= reflected_xss_path %>?q=<script>alert('Basic XSS')</script>" target="_blank">
+        Basic Script Alert
+      </a>
+    </div>
+    
+    <div class="url-example">
+      <a href="<%= reflected_xss_path %>?q=<img src=x onerror=alert('Image XSS')>" target="_blank">
+        Image Tag XSS
+      </a>
+    </div>
+    
+    <div class="url-example">
+      <a href="<%= reflected_xss_path %>?message=<svg onload=alert('SVG XSS')></svg>" target="_blank">
+        SVG Element XSS
+      </a>
+    </div>
+
+    <div class="url-example">
+      <a href="<%= reflected_xss_path %>?q=<iframe src='javascript:alert(\"Iframe XSS\")'></iframe>" target="_blank">
+        Iframe XSS
+      </a>
+    </div>
+
+    <div style="margin-top: 30px;">
+      <a href="<%= xss_demo_path %>" class="btn btn-info">Back to XSS Demo Home</a>
+      <a href="<%= safe_reflected_xss_path %>" class="btn btn-warning">View Safe Version</a>
+    </div>
+
+    <div style="background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 5px; margin-top: 20px;">
+      <strong>How this works:</strong><br>
+      1. Attacker crafts a malicious URL with JavaScript in parameters<br>
+      2. Victim clicks the link or submits the form<br>
+      3. Server reflects the input back without sanitization<br>
+      4. Browser executes the malicious script in the victim's session<br>
+      5. Can steal cookies, redirect, or perform actions as the victim
+    </div>
+  </div>
+</body>
+</html>

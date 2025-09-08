@@ -19,9 +19,6 @@
         </button>
 
         <div id="nav" class="collapse navbar-collapse">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item"><%= link_to "Events", events_path, class: "nav-link" %></li>
-          </ul>
 
           <ul class="navbar-nav ms-auto">
             <% if current_user %>
@@ -29,7 +26,7 @@
                 <span class="navbar-text me-3"><%= current_user.email %></span>
               </li>
               <li class="nav-item">
-                <%= button_to "Logout", session_path, method: :delete, class: "btn btn-outline-light btn-sm" %>
+                <%= button_to "Logout", session_path(current_user), method: :delete, class: "btn btn-outline-light btn-sm" %>
               </li>
             <% else %>
               <li class="nav-item">
@@ -44,15 +41,15 @@
     <div class="container my-4">
 
       <!-- FLASH MESSAGES -->
-      <% if notice.present? %>
+      <% if flash[:success].present? %>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-          <%= notice %>
+          <%= flash[:success] %>
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       <% end %>
-      <% if alert.present? %>
+      <% if flash[:danger].present? %>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-          <%= alert %>
+          <%= flash[:danger] %>
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       <% end %>

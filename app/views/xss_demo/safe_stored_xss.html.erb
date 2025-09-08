@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Safe Stored XSS Demo - PROTECTED</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .safe-banner {
+      background: #27ae60;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    .comment-form {
+      background: #d5f4e6;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    .comment {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+    .comment-header {
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+    .comment-content {
+      line-height: 1.6;
+    }
+    .btn {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      text-decoration: none;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-success { background-color: #27ae60; }
+    .btn-info { background-color: #3498db; }
+    .btn-danger { background-color: #e74c3c; }
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-family: Arial, sans-serif;
+    }
+    .protection-info {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      margin: 15px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="safe-banner">
+      ✅ PROTECTED STORED XSS DEMO ✅<br>
+      This page demonstrates proper XSS protection techniques
+    </div>
+
+    <h1>💬 Comment System - Safe Implementation</h1>
+    
+    <p><strong>Protection:</strong> User input is properly sanitized before storage and escaped during display. HTML tags are converted to safe entities.</p>
+
+    <div class="comment-form">
+      <h3>Add a Comment (Safe)</h3>
+      <%= form_tag safe_stored_xss_path, method: :post do %>
+        <textarea name="content" rows="4" placeholder="Enter your comment here... HTML will be safely escaped!"></textarea><br>
+        <button type="submit" class="btn btn-success">Post Comment (Safe)</button>
+      <% end %>
+      
+      <div class="protection-info">
+        Protection methods applied:<br>
+        • CGI.escapeHTML() - Converts &lt; &gt; & " ' to entities<br>
+        • Rails default escaping - ERB automatically escapes output<br>
+        • Input validation - Length limits and presence checks<br>
+        Try the same XSS payloads - they will be safely displayed as text!
+      </div>
+    </div>
+
+    <h3>Comments (<%= @comments.count %>)</h3>
+    <% if @comments.any? %>
+      <% @comments.each do |comment| %>
+        <div class="comment">
+          <div class="comment-header">
+            User #<%= comment.user_id %> • <%= comment.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+          </div>
+          <div class="comment-content">
+            <!-- SAFE: Rails automatically escapes HTML by default -->
+            <%= comment.content %>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <p>No comments yet. Be the first to comment!</p>
+    <% end %>
+
+    <div style="margin-top: 30px;">
+      <a href="<%= xss_demo_path %>" class="btn btn-info">Back to XSS Demo Home</a>
+      <a href="<%= stored_xss_path %>" class="btn btn-danger">View Vulnerable Version</a>
+      <%= link_to "Clear All Comments", clear_comments_path, method: :delete, 
+                  class: "btn btn-danger", 
+                  confirm: "Are you sure you want to delete all comments?" %>
+    </div>
+
+    <div style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px; margin-top: 20px;">
+      <strong>How protection works:</strong><br>
+      1. <strong>Input Sanitization:</strong> HTML special characters are escaped before database storage<br>
+      2. <strong>Output Encoding:</strong> Rails ERB templates automatically escape HTML by default<br>
+      3. <strong>Validation:</strong> Input validation prevents malformed or excessive content<br>
+      4. <strong>Content Security Policy:</strong> CSP headers can prevent inline script execution<br>
+      5. <strong>HttpOnly Cookies:</strong> Prevents JavaScript access to session cookies
+    </div>
+
+    <h3>Code Comparison</h3>
+    <div style="background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin: 10px 0;">
+      <h4 style="color: #e74c3c;">❌ Vulnerable Code:</h4>
+      <pre style="background: #f8f9fa; padding: 10px; border-radius: 3px;"><code># Controller
+comment.content = params[:content]  # No sanitization
+
+# View
+&lt;%= raw comment.content %&gt;  # Disables escaping</code></pre>
+    </div>
+
+    <div style="background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin: 10px 0;">
+      <h4 style="color: #27ae60;">✅ Safe Code:</h4>
+      <pre style="background: #f8f9fa; padding: 10px; border-radius: 3px;"><code># Controller
+safe_content = CGI.escapeHTML(params[:content])
+comment.content = safe_content  # Sanitized input
+
+# View
+&lt;%= comment.content %&gt;  # Rails auto-escapes by default</code></pre>
+    </div>
+  </div>
+</body>
+</html>
