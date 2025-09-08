@@ -6,7 +6,7 @@
         <%= form_with url: sessions_path, method: :post do %>
           <div class="mb-3">
             <%= label_tag :email, "Email", class: "form-label" %>
-            <%= email_field_tag :email, nil, class: "form-control", placeholder: "you@example.com", required: true %>
+            <%= text_field_tag :email, nil, class: "form-control", placeholder: "you@example.com", required: true %>
           </div>
           <div class="mb-3">
             <%= label_tag :password, "Password", class: "form-label" %>

