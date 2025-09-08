@@ -4,18 +4,16 @@ class SessionsController < ApplicationController
 
   # POST /sessions
   def create
-    email = params[:email]
-    pass  = params[:password]
-    sql = "SELECT * FROM users WHERE email='#{email}' AND password_digest='#{pass}' LIMIT 1"
-    user = User.find_by_sql(sql).first
+    find_user
+    return if performed?
 
-    if user
-      session[:user_id] = user.id
+    if @user&.authenticate(params[:password])
+      session[:user_id] = @user.id
       flash[:success] = "Login successful"
       redirect_to root_path
     else
-      flash.now[:danger] = "Invalid credentials"
-      render :new, status: :unauthorized
+      flash[:danger] = "Invalid credentials"
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -23,5 +21,15 @@ class SessionsController < ApplicationController
   def destroy
     reset_session
     redirect_to root_path
+  end
+
+  private
+
+  def find_user
+    @user ||= User.find_by(email: params[:email])
+    return if @user
+
+    flash[:danger] = "Invalid credentials"
+    render :new, status: :unprocessable_entity
   end
 end

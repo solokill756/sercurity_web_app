@@ -44,15 +44,15 @@
     <div class="container my-4">
 
       <!-- FLASH MESSAGES -->
-      <% if notice.present? %>
+      <% if flash[:success].present? %>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-          <%= notice %>
+          <%= flash[:success] %>
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       <% end %>
-      <% if alert.present? %>
+      <% if flash[:danger].present? %>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-          <%= alert %>
+          <%= flash[:danger] %>
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       <% end %>
