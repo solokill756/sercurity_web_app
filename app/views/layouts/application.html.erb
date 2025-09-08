@@ -29,7 +29,7 @@
                 <span class="navbar-text me-3"><%= current_user.email %></span>
               </li>
               <li class="nav-item">
-                <%= button_to "Logout", session_path, method: :delete, class: "btn btn-outline-light btn-sm" %>
+                <%= button_to "Logout", session_path(current_user), method: :delete, class: "btn btn-outline-light btn-sm" %>
               </li>
             <% else %>
               <li class="nav-item">
