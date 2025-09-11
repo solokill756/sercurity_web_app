@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit Profile - Securitour</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .edit-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .edit-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+      margin-top: 30px;
+    }
+    .edit-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+      position: relative;
+    }
+    .edit-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="20" cy="60" r="0.8" fill="white" opacity="0.1"/><circle cx="80" cy="30" r="0.6" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    }
+    .edit-header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+    }
+    .edit-header p {
+      margin: 10px 0 0 0;
+      opacity: 0.9;
+      font-size: 1.1rem;
+      position: relative;
+      z-index: 1;
+    }
+    .edit-body {
+      padding: 40px 30px;
+    }
+    .form-group {
+      margin-bottom: 25px;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.95rem;
+    }
+    .form-control {
+      width: 100%;
+      padding: 15px 20px;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    .form-control:hover {
+      border-color: #cbd5e0;
+      background: white;
+    }
+    .btn {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    .btn-secondary:hover {
+      background: #545b62;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    .btn-danger:hover {
+      background: #c82333;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(220,53,69,0.3);
+    }
+    .form-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 20px;
+      transition: color 0.3s ease;
+    }
+    .back-link:hover {
+      color: #764ba2;
+    }
+    .back-link i {
+      margin-right: 8px;
+    }
+    .user-info {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      border-left: 4px solid #667eea;
+    }
+    .alert {
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: none;
+    }
+    .alert-danger {
+      background: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+    }
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+    .form-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .form-col {
+      flex: 1;
+      min-width: 250px;
+    }
+    @media (max-width: 768px) {
+      .edit-container {
+        padding: 10px;
+      }
+      .edit-header {
+        padding: 30px 20px;
+      }
+      .edit-header h1 {
+        font-size: 2rem;
+      }
+      .edit-body {
+        padding: 30px 20px;
+      }
+      .form-actions {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="edit-container">
+    <!-- Back Navigation -->
+    <a href="<%= user_path(current_user) %>" class="back-link">
+      <i class="fas fa-arrow-left"></i> Back to Profile
+    </a>
+
+    <div class="edit-card">
+      <!-- Header -->
+      <div class="edit-header">
+        <h1><i class="fas fa-user-edit"></i> Edit Profile</h1>
+        <p>Update your personal information</p>
+      </div>
+
+      <!-- Body -->
+      <div class="edit-body">
+        <!-- Current User Info -->
+        <div class="user-info">
+          <h5 style="margin: 0 0 10px 0; color: #2c3e50;">
+            <i class="fas fa-info-circle"></i> Current Information
+          </h5>
+          <p style="margin: 5px 0; color: #6c757d;">
+            <strong>User ID:</strong> <%= current_user.id %>
+          </p>
+          <p style="margin: 5px 0; color: #6c757d;">
+            <strong>Account Created:</strong> <%= current_user.created_at.strftime("%B %d, %Y") %>
+          </p>
+          <p style="margin: 5px 0; color: #6c757d;">
+            <strong>Last Updated:</strong> <%= current_user.updated_at.strftime("%B %d, %Y at %I:%M %p") %>
+          </p>
+        </div>
+
+        <!-- Edit Form -->
+        <%= form_with(model: current_user, local: true) do |form| %>
+          <% if current_user.errors.any? %>
+            <div class="alert alert-danger">
+              <h6><i class="fas fa-exclamation-triangle"></i> Please fix the following errors:</h6>
+              <ul style="margin: 10px 0 0 20px;">
+                <% current_user.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <div class="form-row">
+            <div class="form-col">
+              <div class="form-group">
+                <%= form.label :email, class: "form-label" do %>
+                  <i class="fas fa-envelope"></i> Email Address
+                <% end %>
+                <%= form.email_field :email, class: "form-control", placeholder: "Enter your email" %>
+              </div>
+            </div>
+            <input type="hidden" name="user[role]" value="user">
+
+          <!-- Password Section -->
+          <div style="background: #e7f3ff; padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 4px solid #007bff;">
+            <h6 style="margin: 0 0 15px 0; color: #004085;">
+              <i class="fas fa-lock"></i> Change Password
+            </h6>
+            
+            <div class="form-row">
+              <div class="form-col">
+                <div class="form-group">
+                  <%= form.label :password, class: "form-label" do %>
+                    <i class="fas fa-key"></i> New Password
+                  <% end %>
+                  <%= form.password_field :password, class: "form-control", placeholder: "Leave blank to keep current password" %>
+                </div>
+              </div>
+
+              <div class="form-col">
+                <div class="form-group">
+                  <%= form.label :password_confirmation, class: "form-label" do %>
+                    <i class="fas fa-check-circle"></i> Confirm New Password
+                  <% end %>
+                  <%= form.password_field :password_confirmation, class: "form-control", placeholder: "Confirm your new password" %>
+                </div>
+              </div>
+            </div>
+            
+            <small class="text-muted">
+              <i class="fas fa-info-circle"></i> Leave password fields blank if you don't want to change your password
+            </small>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <%= form.submit "Update Profile", class: "btn btn-primary" %>
+            <a href="<%= user_path(current_user) %>" class="btn btn-secondary">
+              <i class="fas fa-times"></i> Cancel
+            </a>
+          </div>
+        <% end %>
+
+        <!-- Danger Zone -->
+        <div style="background: #f8d7da; padding: 20px; border-radius: 12px; margin-top: 40px; border-left: 4px solid #dc3545;">
+          <h6 style="margin: 0 0 15px 0; color: #721c24;">
+            <i class="fas fa-exclamation-triangle"></i> Danger Zone
+          </h6>
+          <p style="margin: 0 0 15px 0; color: #721c24; font-size: 0.9rem;">
+            Once you delete your account, there is no going back. Please be certain.
+          </p>
+          <button class="btn btn-danger" onclick="confirmDelete()">
+            <i class="fas fa-trash"></i> Delete Account
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function confirmDelete() {
+      if (confirm('Are you absolutely sure you want to delete your account? This action cannot be undone.')) {
+        if (confirm('This will permanently delete all your data. Are you really sure?')) {
+          alert('Account deletion feature is not implemented in this demo for safety reasons.');
+        }
+      }
+    }
+
+    // Auto-focus first input
+    document.addEventListener('DOMContentLoaded', function() {
+      const firstInput = document.querySelector('input[type="email"]');
+      if (firstInput) {
+        firstInput.focus();
+      }
+    });
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const email = document.querySelector('input[type="email"]').value;
+      const password = document.querySelector('input[name="user[password]"]').value;
+      const passwordConfirmation = document.querySelector('input[name="user[password_confirmation]"]').value;
+      
+      // Validate email
+      if (!email || !email.includes('@')) {
+        e.preventDefault();
+        alert('Please enter a valid email address.');
+        return false;
+      }
+      
+      // Validate password if provided
+      if (password && password.length < 6) {
+        e.preventDefault();
+        alert('Password must be at least 6 characters long.');
+        return false;
+      }
+      
+      // Validate password confirmation
+      if (password && password !== passwordConfirmation) {
+        e.preventDefault();
+        alert('Password and password confirmation do not match.');
+        return false;
+      }
+    });
+  </script>
+</body>
+</html>
