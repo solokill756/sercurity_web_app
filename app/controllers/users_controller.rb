@@ -1,5 +1,6 @@
 class UsersController < ApplicationController
   before_action :load_user, only: %i(show edit update)
+
   # GET /users/:id
   def show; end
 
@@ -19,10 +20,10 @@ class UsersController < ApplicationController
 
   private
 
-  # def user_params
-  #   # Only allow email and password changes, NOT role
-  #   params.require(:user).permit(:email, :password, :password_confirmation)
-  # end
+  def user_params
+    # Only allow email and password changes, NOT role
+    params.require(:user).permit(:email, :password, :password_confirmation)
+  end
 
   def load_user
     @user = User.find(params[:id])

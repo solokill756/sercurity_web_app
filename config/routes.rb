@@ -4,6 +4,9 @@ Rails.application.routes.draw do
   resources :sessions, only: %i(new create destroy)
   resources :users, only: %i(show edit update)
   resources :events do
+    member do
+      get 'csrf_ajax'  # Route for CSRF demo link
+    end
     resources :comments, only: %i(create destroy)
   end
   

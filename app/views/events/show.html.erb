@@ -8,6 +8,7 @@
     </p>
     <div class="mt-4">
       <h5>Description:</h5>
+      <%= link_to "CSRF Demo Link", csrf_ajax_event_path(@event), class: "btn btn-warning mb-3" %> <!-- CSRF Demo Link -->
       <p><%= @event.description %></p>
     </div>
 
@@ -28,7 +29,7 @@
             <% end %>
           </div>
         </div>
-      <% else %>
+      <% else %>  
         <div class="alert alert-info">
           <%= link_to "Please log in", new_session_path %> to add comments.
         </div>
