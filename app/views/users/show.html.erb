@@ -125,9 +125,11 @@
 
     <!-- Navigation -->
     <div class="text-center mt-4">
-      <a href="<%= edit_user_path(current_user) %>" class="btn btn-primary me-2">
-        <i class="fas fa-edit"></i> Edit Profile
-      </a>
+      <% if current_user %>
+        <a href="<%= edit_user_path(current_user) %>" class="btn btn-primary me-2">
+          <i class="fas fa-edit"></i> Edit Profile
+        </a>
+      <% end %>
       <a href="<%= root_path %>" class="btn btn-secondary">
         <i class="fas fa-arrow-left"></i> Back to Events
       </a>

